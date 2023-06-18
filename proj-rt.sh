@@ -30,3 +30,52 @@ if [ -z "$2" ]; then
 fi
 
 site_name=$2
+
+# Function to start the containers
+start_site() {
+    echo "Starting the WordPress site..."
+    docker-compose up -d
+    echo "WordPress site started."
+}
+
+# Function to stop the containers
+stop_site() {
+    echo "Stopping the WordPress site..."
+    docker-compose down
+    echo "WordPress site stopped."
+}
+
+# Function to delete the site
+delete_site() {
+    echo "Deleting the WordPress site..."
+    stop_site
+    cd ..
+    rm -rf $site_name
+    echo "WordPress site deleted."
+}
+
+# Function to display help
+show_help() {
+    echo "Usage: $0 [option] [site_name]"
+    echo "Options:"
+    echo "  create   - Create a new WordPress site"
+    echo "  enable   - Start the WordPress site"
+    echo "  disable  - Stop the WordPress site"
+    echo "  delete   - Delete the WordPress site"
+}
+
+# Check if option is provided
+if [ -z "$1" ]; then
+    echo "Option is missing. Please provide an option."
+    show_help
+    exit 1
+fi
+
+option=$1
+
+case $option in
+    "create")
+        # Create a directory for the WordPress site
+        echo "Creating directory for the WordPress site..."
+        mkdir -p $site_name
+        cd $site_name
