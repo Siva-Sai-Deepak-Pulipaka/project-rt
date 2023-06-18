@@ -79,3 +79,93 @@ case $option in
         echo "Creating directory for the WordPress site..."
         mkdir -p $site_name
         cd $site_name
+
+# Docker Compose file for the WordPress site
+        cat <<EOF > docker-compose.yml
+version: '3.9'
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - db_data:/var/lib/mysql
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - ./wp-content:/var/www/html/wp-content
+  nginx:
+    image: nginx:latest
+    restart: always
+    ports:
+      - 8080:80
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/wordpress:/var/www/html
+volumes:
+  db_data:
+EOF
+
+        # nginx configuration for handling php requests
+        mkdir -p nginx/conf.d
+        cat <<EOF > nginx/conf.d/default.conf
+server {
+    listen 80;
+    server_name example.com;
+    root /var/www/html;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$args;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass wordpress:9000;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        fastcgi_param PHP_VALUE "upload_max_filesize = 64M \n post_max_size=64M";
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+EOF
+
+        # Add /etc/hosts entry for example.com
+        sudo sed -i "/example.com/d" /etc/hosts
+        echo "127.0.0.1 example.com" | sudo tee -a /etc/hosts > /dev/null
+
+        # Start the WordPress site
+        start_site
+
+        echo "WordPress site created successfully!"
+        echo "Site URL: http://example.com:8080"
+        echo "Site directory: $(pwd)"
+        ;;
+    "enable")
+        start_site
+        ;;
+    "disable")
+        stop_site
+        ;;
+    "delete")
+        delete_site
+        ;;
+    *)
+        echo "Invalid option. Please provide a valid option."
+        show_help
+        exit 1
+        ;;
+esac
