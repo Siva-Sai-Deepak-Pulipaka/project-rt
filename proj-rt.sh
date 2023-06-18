@@ -78,9 +78,9 @@ case $option in
         # Create a directory for the WordPress site
         echo "Creating directory for the WordPress site..."
         mkdir -p $site_name
-        cd $site_name
+        cd $site_name || exit
 
-# Docker Compose file for the WordPress site
+        # Docker Compose file for the WordPress site
         cat <<EOF > docker-compose.yml
 version: '3.9'
 services:
@@ -153,15 +153,19 @@ EOF
         echo "WordPress site created successfully!"
         echo "Site URL: http://example.com:8080"
         echo "Site directory: $(pwd)"
+        echo "Please wait for a moment and then try accessing the site."
         ;;
     "enable")
         start_site
+        echo "WordPress site is now enabled."
         ;;
     "disable")
         stop_site
+        echo "WordPress site is now disabled."
         ;;
     "delete")
         delete_site
+        echo "WordPress site has been deleted."
         ;;
     *)
         echo "Invalid option. Please provide a valid option."
