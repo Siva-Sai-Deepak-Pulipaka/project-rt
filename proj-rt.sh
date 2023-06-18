@@ -22,3 +22,11 @@ if ! command -v docker-compose &> /dev/null; then
 else
     echo "Docker Compose is already installed."
 fi
+
+# Check if site name is provided as a command-line argument
+if [ -z "$2" ]; then
+    echo "Site name is missing. Please provide a site name as a command-line argument."
+    exit 1
+fi
+
+site_name=$2
