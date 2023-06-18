@@ -112,15 +112,15 @@ services:
     ports:
       - 8080:80
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/wordpress:/var/www/html
+      - ./example.com/nginx/conf.d:/etc/nginx/conf.d
+      - ./example.com/nginx/wordpress:/var/www/html
 volumes:
   db_data:
 EOF
 
         # nginx configuration for handling php requests
-        mkdir -p nginx/conf.d
-        cat <<EOF > nginx/conf.d/default.conf
+        mkdir -p example.com/nginx/conf.d
+        cat <<EOF > example.com/nginx/conf.d/default.conf
 server {
     listen 80;
     server_name example.com;
